@@ -2,7 +2,7 @@ variable "resource_group_name" {
   type        = string
   description = "name of resource group"
   validation {
-    condition = length(var.resource_group_name) != 0
+    condition     = length(var.resource_group_name) != 0
     error_message = "Resource group name cannot be empty or null"
   }
 }
@@ -10,9 +10,9 @@ variable "resource_group_name" {
 variable "location" {
   type        = string
   description = "resource location"
-  nullable = false
+  nullable    = false
   validation {
-    condition = contains(["easteurope","westeurope"], lower(var.location))
+    condition     = contains(["easteurope", "westeurope"], lower(var.location))
     error_message = "Location can be either easteurope or westeurope"
   }
 }

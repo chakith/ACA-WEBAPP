@@ -81,11 +81,7 @@ resource "azurerem_container_app" "webapp" {
   }
 
   secret {
-    name  = "azure-tables-url"
-    value = "https://${var.storage_account_name}.table.core.windows.net/"
-  }
-  secret {
-    name  = "azure-tables-client-id"
+    name  = "client-id"
     value = azurerm_user_assigned_identity.managed_identity.client_id
   }
   template {
@@ -99,14 +95,9 @@ resource "azurerem_container_app" "webapp" {
         name  = "WEBSITES_PORT"
         value = var.websites_port
       }
-
       env {
-        name        = "AZURE_TABLES_SERVICE_URL"
-        secret_name = "azure-tables-service-url"
-      }
-      env {
-        name        = "AZURE_TABLES_CLIENT_ID"
-        secret_name = "azure-tables-client-id"
+        name        = "CLIENT_ID" # TODO 
+        secret_name = "client-id"
       }
     }
   }
