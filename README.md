@@ -5,7 +5,7 @@
 ```
 
 module "aca-app" {
-    source = "git::https://github.com/chakith/acr-app?ref=tags/v1.0.0"
+    source = "git::https://github.com/chakith/aca-webapp?ref=tags/v1.0.0"
     resource_group_name   = "webapp-dev"
     location              = "westeurope"
     registry_name         = "acr"
@@ -22,5 +22,12 @@ module "aca-app" {
 
 ```
 
+```
 
+terraform init
+terraform plan -var-file=develop.tfvars
+terraform apply -var-file=develop.tfvars -auto-approve
+terraform destroy -var-file=develop.tfvars
+
+```
 

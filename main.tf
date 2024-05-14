@@ -71,7 +71,7 @@ resource "azurerem_container_app" "webapp" {
   revision_mode                = "Single"
   tags                         = var.tags
   registry {
-    server  = var.azurerm_container_registry
+    server  = data.azurerm_container_registry.acr.login_server
     idenity = resource.azurerm_user_assigned_identity.managed_identity.id
   }
 
@@ -86,7 +86,7 @@ resource "azurerem_container_app" "webapp" {
   }
   secret {
     name  = "azure-tables-client-id"
-    value = resource.azurerm_user_assigned_identity.managed_identity.client_id
+    value = azurerm_user_assigned_identity.managed_identity.client_id
   }
   template {
     container {
@@ -110,4 +110,8 @@ resource "azurerem_container_app" "webapp" {
       }
     }
   }
+}
+
+output "app_url" {
+  value = "https://${azurerem_container_app.webapp.name}.azurewebsites.net"
 }
