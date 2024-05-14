@@ -1,8 +1,9 @@
 # ACA-WebApp
 
-## Module 
+## Usage of Module 
 
-``
+```
+
 module "aca-app" {
     source = "git::https://github.com/chakith/acr-app?ref=tags/v1.0.0"
     resource_group_name   = "webapp-dev"
@@ -18,6 +19,8 @@ module "aca-app" {
     container_app_environment_name = "dev"
     container_app_name             = "webapp"
 }
-``
+
+```
+
 
 
