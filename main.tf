@@ -96,9 +96,10 @@ resource "azurerem_container_app" "webapp" {
         value = var.websites_port
       }
       env {
-        name        = "CLIENT_ID" # TODO 
+        name        = "CLIENT_ID" 
         secret_name = "client-id"
       }
+      # TODO 
     }
   }
 }
