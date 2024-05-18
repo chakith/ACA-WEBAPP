@@ -1,6 +1,16 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+     # version = ">3.0.0"
+    }
+  }
+}
+
+
+
 provider "azurerm" {
   features {
-
   }
 }
 
@@ -15,7 +25,7 @@ data "azurerm_container_registry" "acr" {
 }
 
 resource "azurerm_log_analytics_workspace" "webapp-laws" {
-  name                = vars.laws_name
+  name                = var.laws_name
   location            = var.location
   resource_group_name = var.resource_group_name
   sku                 = "PerGB2018"
@@ -31,7 +41,7 @@ resource "azurerm_user_assigned_identity" "managed_identity" {
 }
 
 resource "azurerm_role_assignment" "assign_identity_storage_blob_data_contributor" {
-  scope              = azuerm_storage_account.webapp.id
+  scope              = azurerm_storage_account.webapp.id
   role_definition_id = "Storage Table Data Contributor"
   principal_id       = azurerm_user_assigned_identity.managed_identity.principal_id
   depends_on         = [azurerm_storage_account.webapp]
@@ -40,7 +50,7 @@ resource "azurerm_role_assignment" "assign_identity_storage_blob_data_contributo
 resource "azurerm_storage_account" "webapp" {
   name                     = var.storage_account_name
   resource_group_name      = azurerm_resource_group.webapp.name
-  location                 = azurerm_resource_group.webapp.location
+  location                 = var.resource_group_name
   account_tier             = "Standard"
   account_replication_type = "GRS"
   identity {
@@ -57,22 +67,23 @@ resource "azurerm_role_assignment" "role_assignment_pull" {
   principal_id       = resource.azurerm_user_assigned_identity.managed_identity.principal_id
 }
 
-resource "azurerem_container_app_environment" "webapp" {
+resource "azurerm_container_app_environment" "webapp" {
   name                       = var.container_app_environment_name
-  location                   = azurerm_resource_group.webapp.location
-  resource_group_name        = azurerm_resource_group.webapp.name
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.webapp.id
+  location                   = var.location
+  resource_group_name        = var.resource_group_name
+  log_analytics_workspace_id = resource.azurerm_log_analytics_workspace.webapp-laws.id
+  depends_on = [ azurerm_log_analytics_workspace.webapp-laws ]
 }
 
-resource "azurerem_container_app" "webapp" {
+resource "azurerm_container_app" "webapp" {
   name                         = var.container_app_name
-  container_app_environment_id = azurerem_container_app_environment.webapp.id
-  resource_group_name          = azurerem_container_app_environment.webapp.id
+  container_app_environment_id = azurerm_container_app_environment.webapp.id
+  resource_group_name          = azurerm_resource_group.webapp.name
   revision_mode                = "Single"
   tags                         = var.tags
   registry {
     server  = data.azurerm_container_registry.acr.login_server
-    idenity = resource.azurerm_user_assigned_identity.managed_identity.id
+    identity = azurerm_user_assigned_identity.managed_identity.id
   }
 
   identity {
@@ -82,7 +93,7 @@ resource "azurerem_container_app" "webapp" {
 
   secret {
     name  = "client-id"
-    value = azurerm_user_assigned_identity.managed_identity.client_id
+    value = resource.azurerm_user_assigned_identity.managed_identity.client_id
   }
   template {
     container {
@@ -96,7 +107,7 @@ resource "azurerem_container_app" "webapp" {
         value = var.websites_port
       }
       env {
-        name        = "CLIENT_ID" 
+        name        = "CLIENT_ID"
         secret_name = "client-id"
       }
       # TODO 
@@ -105,5 +116,5 @@ resource "azurerem_container_app" "webapp" {
 }
 
 output "app_url" {
-  value = "https://${azurerem_container_app.webapp.name}.azurewebsites.net"
+  value = "https://${azurerm_container_app.webapp.name}.azurewebsites.net"
 }
